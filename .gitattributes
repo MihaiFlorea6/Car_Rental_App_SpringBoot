@@ -1,1 +1,2 @@
 *.sql linguist-generated=false linguist-detectable=true
+templates/client.html linguist-detectable=false
