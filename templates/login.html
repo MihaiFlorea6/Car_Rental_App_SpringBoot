@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Car Rental - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Road */
+        .road {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: #2c3e50;
+            z-index: 0;
+        }
+
+        .road::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: repeating-linear-gradient(
+                90deg,
+                #f39c12 0px,
+                #f39c12 40px,
+                transparent 40px,
+                transparent 80px
+            );
+            animation: roadMove 1s linear infinite;
+        }
+
+        @keyframes roadMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-80px); }
+        }
+
+        /* Animated Cars */
+        .cars-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .car {
+            position: absolute;
+            font-size: 48px;
+            animation: carDrive 15s linear infinite;
+        }
+
+        .car:nth-child(1) {
+            bottom: 60px;
+            animation-delay: 0s;
+        }
+
+        .car:nth-child(2) {
+            bottom: 60px;
+            animation-delay: 5s;
+        }
+
+        .car:nth-child(3) {
+            bottom: 60px;
+            animation-delay: 10s;
+        }
+
+        @keyframes carDrive {
+            0% {
+                left: -100px;
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                left: calc(100% + 100px);
+                transform: scale(1);
+            }
+        }
+
+        /* Floating Clouds */
+        .cloud {
+            position: absolute;
+            color: rgba(255,255,255,0.3);
+            font-size: 80px;
+            animation: cloudFloat 20s linear infinite;
+        }
+
+        .cloud:nth-child(1) {
+            top: 10%;
+            animation-delay: 0s;
+        }
+
+        .cloud:nth-child(2) {
+            top: 30%;
+            animation-delay: 7s;
+        }
+
+        .cloud:nth-child(3) {
+            top: 50%;
+            animation-delay: 14s;
+        }
+
+        @keyframes cloudFloat {
+            0% {
+                left: -150px;
+            }
+            100% {
+                left: calc(100% + 150px);
+            }
+        }
+
+        /* Sparkling Stars */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Login Card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 10;
+            animation: cardEntrance 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes cardEntrance {
+            0% {
+                transform: scale(0.3) translateY(-100px);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 42px;
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 14px;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        @keyframes slideInDown {
+            0% { transform: translateY(-30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #fee, #fcc);
+            color: #c33;
+            border: 2px solid #fcc;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 16px 16px 16px 50px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="text"]:focus + .input-icon,
+        input[type="password"]:focus + .input-icon {
+            transform: translateY(-50%) scale(1.2);
+            color: #764ba2;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-login:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            color: #999;
+            font-size: 15px;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ddd, transparent);
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .register-section {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            margin-top: 25px;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .register-section p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .btn-register {
+            display: inline-block;
+            padding: 12px 35px;
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-register:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .test-credentials {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            font-size: 13px;
+            animation: slideInUp 1s ease-out;
+        }
+
+        @keyframes slideInUp {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .test-credentials h4 {
+            color: #856404;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .test-credentials ul {
+            list-style: none;
+            color: #856404;
+        }
+
+        .test-credentials li {
+            margin: 8px 0;
+            padding: 5px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+        }
+
+        .test-credentials strong {
+            color: #333;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<!-- Animated Background Elements -->
+<div class="stars" id="stars"></div>
+
+<div class="cars-container">
+    <div class="cloud">☁️</div>
+    <div class="cloud">☁️</div>
+    <div class="cloud">☁️</div>
+    <div class="car">🚗</div>
+    <div class="car">🚙</div>
+    <div class="car">🚕</div>
+</div>
+
+<div class="road"></div>
+
+<!-- Login Card -->
+<div class="login-card">
+    <div class="header">
+        <h1>🚗 Car Rental</h1>
+        <p>Sistem de închiriere autoturisme</p>
+    </div>
+
+    <!-- Mesaj eroare -->
+    <div th:if="${param.error}" class="alert alert-error">
+        ❌ Invalid username or password
+    </div>
+
+    <!-- Mesaj logout -->
+    <div th:if="${param.logout}" class="alert alert-success">
+        ✅ Ai fost deconectat cu succes!
+    </div>
+
+    <!-- Mesaj înregistrare reușită -->
+    <div th:if="${param.registered}" class="alert alert-success">
+        ✅ Cont creat cu succes! Te poți autentifica acum.
+    </div>
+
+    <!-- Formular login -->
+    <form th:action="@{/login}" method="post" id="loginForm">
+        <div class="form-group">
+            <label for="username">👤 Username</label>
+            <div class="input-wrapper">
+                <input type="text" id="username" name="username" required autofocus placeholder="Introdu username-ul">
+                <span class="input-icon">👤</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">🔒 Password</label>
+            <div class="input-wrapper">
+                <input type="password" id="password" name="password" required placeholder="Introdu parola">
+                <span class="input-icon">🔒</span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-login">
+            🚀 Login
+        </button>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+        </div>
+    </form>
+
+    <div class="divider">SAU</div>
+
+    <!-- Secțiune înregistrare -->
+    <div class="register-section">
+        <p>📝 Nu ai cont?</p>
+        <a href="/register" class="btn-register">Creează cont nou</a>
+    </div>
+
+    <!-- Credențiale de test -->
+    <div class="test-credentials">
+        <h4>🔑 Credențiale de test:</h4>
+        <ul>
+            <li><strong>👑 Admin:</strong> admin / parola123</li>
+            <li><strong>👨‍💼 Manager:</strong> manager / parola123</li>
+            <li><strong>👤 Client:</strong> client / parola123</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Generate random stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        starsContainer.appendChild(star);
+    }
+
+    // Form submission animation
+    document.getElementById('loginForm').addEventListener('submit', function() {
+        document.getElementById('loading').style.display = 'block';
+    });
+
+    // Add ripple effect to inputs
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+
+    // Add hover effect to test credentials
+    document.querySelectorAll('.test-credentials li').forEach(li => {
+        li.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px)';
+            this.style.transition = 'all 0.3s';
+        });
+
+        li.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+</script>
+</body>
+</html>

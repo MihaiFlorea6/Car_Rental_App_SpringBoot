@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Car Rental</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,106.7C1248,96,1344,96,1392,96L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x bottom;
+            animation: wave 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes wave {
+            0% { background-position: 0 0; }
+            100% { background-position: 1440px 0; }
+        }
+
+        .header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            color: white;
+            padding: 25px 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+            50% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6); }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .btn-success { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #fa709a, #fee140); color: white; }
+        .btn-sm { padding: 8px 16px; font-size: 14px; }
+        .btn-secondary { background: linear-gradient(135deg, #6c757d, #495057); color: white; }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            float: right;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            border: none;
+            border-radius: 15px 15px 0 0;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: translateX(-50%);
+            transition: width 0.3s;
+        }
+
+        .tab:hover::after, .tab.active::after {
+            width: 80%;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .tab-content.active { display: block; }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        th:first-child { border-radius: 10px 0 0 10px; }
+        th:last-child { border-radius: 0 10px 10px 0; }
+
+        tr {
+            background: white;
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+
+        td:first-child { border-radius: 10px 0 0 10px; }
+        td:last-child { border-radius: 0 10px 10px 0; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 700px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: modalZoom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalZoom {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            transform: translateY(-2px);
+        }
+
+        .attribute-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .attribute-item:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateX(10px);
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .status-pending { background: linear-gradient(135deg, #fff3cd, #ffeaa7); color: #856404; }
+        .status-approved { background: linear-gradient(135deg, #d4edda, #00b894); color: #155724; }
+        .status-rejected { background: linear-gradient(135deg, #f8d7da, #ff7675); color: #721c24; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+            transition: all 0.3s;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(102,126,234,0.5);
+        }
+
+        .stat-card h3 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            gap: 3px;
+        }
+
+        .star {
+            color: #ffd700;
+            font-size: 18px;
+        }
+
+        .feedback-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .feedback-card:hover {
+            box-shadow: 0 10px 25px rgba(102,126,234,0.3);
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logout-btn" style="float: right;">
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger">🚪 Logout</button>
+        </form>
+    </div>
+    <h1>👨‍💼 Manager Dashboard</h1>
+    <p>Gestionare completă a sistemului de închiriere</p>
+</div>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3 th:text="${#lists.size(cars)}">10</h3>
+            <p>🚗 Total Mașini</p>
+        </div>
+        <div class="stat-card">
+            <h3 th:text="${#lists.size(rentals)}">25</h3>
+            <p>📋 Total Închirieri</p>
+        </div>
+        <div class="stat-card">
+            <h3 th:text="${#lists.size(employees)}">8</h3>
+            <p>👥 Angajați</p>
+        </div>
+        <div class="stat-card">
+            <h3 th:text="${#lists.size(clients)}">50</h3>
+            <p>👤 Clienți</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab(event, 'cars')">🚗 Autoturisme</button>
+            <button class="tab" onclick="showTab(event, 'rentals')">📋 Închirieri</button>
+            <button class="tab" onclick="showTab(event, 'employees')">👥 Angajați</button>
+            <button class="tab" onclick="showTab(event, 'feedback')">⭐ Feedback</button>
+            <button class="tab" onclick="showTab(event, 'email')">📧 Email</button>
+        </div>
+
+        <!-- Cars Tab -->
+        <div id="cars" class="tab-content active">
+            <h2>🚗 Gestionare Autoturisme</h2>
+            <button class="btn btn-primary" onclick="showAddCarModal()">➕ Adaugă Autoturism</button>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Categorie</th>
+                    <th>An</th>
+                    <th>Preț/Zi</th>
+                    <th>Disponibil</th>
+                    <th>Acțiuni</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="car : ${cars}">
+                    <td th:text="${car.id}"></td>
+                    <td th:text="${car.brand}"></td>
+                    <td th:text="${car.model}"></td>
+                    <td th:text="${car.category}"></td>
+                    <td th:text="${car.year}"></td>
+                    <td th:text="${car.pricePerDay} + ' RON'"></td>
+                    <td>
+                        <button class="btn btn-sm"
+                                th:data-car-id="${car.id}"
+                                th:data-available="${car.available}"
+                                th:classappend="${car.available ? 'btn-success' : 'btn-warning'}"
+                                onclick="toggleCarAvailability(this.getAttribute('data-car-id'), this.getAttribute('data-available'))"
+                                style="min-width: 120px;">
+                            <span th:text="${car.available ? '✅ Disponibil' : '⏸️ Indisponibil'}"></span>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-sm" th:data-car-id="${car.id}"
+                                onclick="editCar(this.getAttribute('data-car-id'))">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" th:data-car-id="${car.id}"
+                                onclick="deleteCar(this.getAttribute('data-car-id'))">🗑️ Șterge</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Rentals Tab -->
+        <div id="rentals" class="tab-content">
+            <h2>📋 Cereri de Închiriere</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Client</th>
+                    <th>Mașină</th>
+                    <th>De la</th>
+                    <th>Până la</th>
+                    <th>Status</th>
+                    <th>Preț/Zi</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="rental : ${rentals}">
+                    <td th:text="${rental.id}"></td>
+                    <td th:text="${rental.client != null ? rental.client.username : 'N/A'}"></td>
+                    <td th:text="${rental.car != null ? rental.car.brand + ' ' + rental.car.model : 'N/A'}"></td>
+                    <td th:text="${rental.startDate}"></td>
+                    <td th:text="${rental.endDate}"></td>
+                    <td>
+								<span class="status-badge"
+                                      th:classappend="${rental.status == 'PENDING' ? 'status-pending' : (rental.status == 'APPROVED' ? 'status-approved' : 'status-rejected')}"
+                                      th:text="${rental.status}"></span>
+                    </td>
+                    <td th:text="${rental.car != null ? rental.car.pricePerDay + ' RON' : 'N/A'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Employees Tab -->
+        <div id="employees" class="tab-content">
+            <h2>👥 Gestionare Angajați</h2>
+            <button class="btn btn-primary" onclick="showAddEmployeeModal()">➕ Adaugă Angajat</button>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Activ</th>
+                    <th>Acțiuni</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="emp : ${employees}">
+                    <td th:text="${emp.id}"></td>
+                    <td th:text="${emp.username}"></td>
+                    <td th:text="${emp.email}"></td>
+                    <td th:text="${emp.enabled ? '✅ Da' : '❌ Nu'}"></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm"
+                                th:data-emp-id="${emp.id}"
+                                th:data-emp-name="${emp.username}"
+                                onclick="viewAttributes(this.getAttribute('data-emp-id'), this.getAttribute('data-emp-name'))">
+                            📝 Atribuții
+                        </button>
+                        <button class="btn btn-danger btn-sm"
+                                th:data-emp-id="${emp.id}"
+                                onclick="deleteEmployee(this.getAttribute('data-emp-id'))">
+                            🗑️ Șterge
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Feedback Tab -->
+        <div id="feedback" class="tab-content">
+            <h2>⭐ Feedback Primit de la Clienți</h2>
+            <button class="btn btn-primary" onclick="showSendFeedbackModal()">📤 Trimite Feedback către Client</button>
+
+            <div th:if="${feedbacks != null and !feedbacks.isEmpty()}">
+                <div class="feedback-card" th:each="fb : ${feedbacks}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong th:text="'De la: ' + ${fb.client != null ? fb.client.username : 'Anonim'}">Client</strong>
+                        <div class="star-rating">
+                            <span class="star" th:each="i : ${#numbers.sequence(1, fb.rating)}">★</span>
+                        </div>
+                    </div>
+                    <p th:text="${fb.message}">Mesaj feedback</p>
+                    <small th:text="'Mașină: ' + ${fb.car != null ? fb.car.brand + ' ' + fb.car.model : 'N/A'}" style="color: #666;"></small>
+                </div>
+            </div>
+            <div th:if="${feedbacks == null or feedbacks.isEmpty()}" style="text-align: center; padding: 40px; color: #999;">
+                📭 Nu există feedback momentan.
+            </div>
+        </div>
+
+        <!-- Email Tab -->
+        <div id="email" class="tab-content">
+            <h2>📧 Trimite Email către Angajați</h2>
+            <form id="emailForm" onsubmit="sendEmail(event)">
+                <div class="form-group">
+                    <label>Destinatar</label>
+                    <select name="receiverId" required>
+                        <option value="">Selectează...</option>
+                        <option th:each="emp : ${employees}"
+                                th:value="${emp.id}"
+                                th:text="${emp.username}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subiect</label>
+                    <input type="text" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <label>Mesaj</label>
+                    <textarea name="message" rows="6" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">📤 Trimite Email</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Car Modal -->
+<div id="carModal" class="modal">
+    <div class="modal-content">
+        <h2 id="carModalTitle">🚗 Adaugă Autoturism</h2>
+        <form id="carForm" onsubmit="saveCar(event)">
+            <input type="hidden" id="carId">
+            <div class="form-group">
+                <label>Brand *</label>
+                <input type="text" id="brand" required>
+            </div>
+            <div class="form-group">
+                <label>Model *</label>
+                <input type="text" id="model" required>
+            </div>
+            <div class="form-group">
+                <label>Categorie</label>
+                <input type="text" id="category">
+            </div>
+            <div class="form-group">
+                <label>An</label>
+                <input type="number" id="year">
+            </div>
+            <div class="form-group">
+                <label>Culoare</label>
+                <input type="text" id="color">
+            </div>
+            <div class="form-group">
+                <label>Nivel Combustibil (%)</label>
+                <input type="number" id="fuelLevel" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>Viteză Maximă (km/h)</label>
+                <input type="number" id="maxSpeed">
+            </div>
+            <div class="form-group">
+                <label>Preț/Zi (RON) *</label>
+                <input type="number" id="pricePerDay" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary">💾 Salvează</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('carModal')">❌ Anulează</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div id="employeeModal" class="modal">
+    <div class="modal-content">
+        <h2>👤 Adaugă Angajat Nou</h2>
+        <form id="employeeForm" onsubmit="saveEmployee(event)">
+            <div class="form-group">
+                <label>Username *</label>
+                <input type="text" name="username" required>
+            </div>
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" name="password" required minlength="4">
+            </div>
+            <button type="submit" class="btn btn-primary">💾 Salvează</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('employeeModal')">❌ Anulează</button>
+        </form>
+    </div>
+</div>
+
+<!-- Attributes Modal -->
+<div id="attributesModal" class="modal">
+    <div class="modal-content">
+        <h2 id="attributesTitle">📝 Atribuții Angajat</h2>
+        <div class="form-group">
+            <label>Adaugă Atribut Nou</label>
+            <input type="text" id="newAttribute" placeholder="Nume atribut...">
+            <button class="btn btn-success" onclick="addAttribute()" style="margin-top: 10px;">➕ Adaugă</button>
+        </div>
+        <div id="attributesList"></div>
+        <button class="btn btn-danger" onclick="closeModal('attributesModal')" style="margin-top: 20px;">Închide</button>
+    </div>
+</div>
+
+<!-- Send Feedback to Client Modal -->
+<div id="feedbackToClientModal" class="modal">
+    <div class="modal-content">
+        <h2>⭐ Trimite Feedback către Client</h2>
+        <form id="feedbackToClientForm" onsubmit="sendFeedbackToClient(event)">
+            <div class="form-group">
+                <label>Selectează Client</label>
+                <select name="clientId" required>
+                    <option value="">Alege client...</option>
+                    <option th:each="client : ${clients}"
+                            th:value="${client.id}"
+                            th:text="${client.username}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Rating (Stele)</label>
+                <div class="star-rating" id="managerStarRating">
+                    <span class="star" data-rating="1" style="cursor: pointer; font-size: 32px;">★</span>
+                    <span class="star" data-rating="2" style="cursor: pointer; font-size: 32px;">★</span>
+                    <span class="star" data-rating="3" style="cursor: pointer; font-size: 32px;">★</span>
+                    <span class="star" data-rating="4" style="cursor: pointer; font-size: 32px;">★</span>
+                    <span class="star" data-rating="5" style="cursor: pointer; font-size: 32px;">★</span>
+                </div>
+                <input type="hidden" id="managerRatingValue" name="rating" value="5">
+            </div>
+            <div class="form-group">
+                <label>Mesaj</label>
+                <textarea name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">📤 Trimite Feedback</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('feedbackToClientModal')">❌ Anulează</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentEmployeeId = null;
+    let currentCarId = null;
+    let managerSelectedRating = 5;
+
+    // Tab management
+    function showTab(event, tabName) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+    }
+
+    // Car Management
+    function showAddCarModal() {
+        document.getElementById('carModalTitle').textContent = '🚗 Adaugă Autoturism';
+        document.getElementById('carForm').reset();
+        document.getElementById('carId').value = '';
+        currentCarId = null;
+        document.getElementById('carModal').style.display = 'flex';
+    }
+
+    async function editCar(carId) {
+        try {
+            const response = await fetch(`/manager/api/cars`);
+            const cars = await response.json();
+            const car = cars.find(c => c.id == carId);
+
+            if (car) {
+                currentCarId = carId;
+                document.getElementById('carModalTitle').textContent = '✏️ Editează Autoturism';
+                document.getElementById('carId').value = car.id;
+                document.getElementById('brand').value = car.brand;
+                document.getElementById('model').value = car.model;
+                document.getElementById('category').value = car.category || '';
+                document.getElementById('year').value = car.year || '';
+                document.getElementById('color').value = car.color || '';
+                document.getElementById('fuelLevel').value = car.fuelLevel || '';
+                document.getElementById('maxSpeed').value = car.maxSpeed || '';
+                document.getElementById('pricePerDay').value = car.pricePerDay;
+                document.getElementById('carModal').style.display = 'flex';
+            }
+        } catch (error) {
+            alert('❌ Eroare la încărcarea datelor: ' + error.message);
+        }
+    }
+
+    async function saveCar(event) {
+        event.preventDefault();
+
+        const data = {
+            brand: document.getElementById('brand').value,
+            model: document.getElementById('model').value,
+            category: document.getElementById('category').value,
+            year: parseInt(document.getElementById('year').value) || null,
+            color: document.getElementById('color').value,
+            fuelLevel: parseInt(document.getElementById('fuelLevel').value) || null,
+            maxSpeed: parseInt(document.getElementById('maxSpeed').value) || null,
+            pricePerDay: parseFloat(document.getElementById('pricePerDay').value),
+            available: true
+        };
+
+        try {
+            const url = currentCarId ? `/manager/api/cars/${currentCarId}` : '/manager/api/cars';
+            const method = currentCarId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(currentCarId ? '✅ Autoturism actualizat!' : '✅ Autoturism adăugat!');
+                location.reload();
+            } else {
+                alert('❌ Eroare: ' + result.message);
+            }
+        } catch (error) {
+            alert('❌ Eroare: ' + error.message);
+        }
+    }
+
+    async function deleteCar(carId) {
+        if (confirm('⚠️ Sigur doriți să ștergeți acest autoturism?')) {
+            try {
+                const response = await fetch(`/manager/api/cars/${carId}`, { method: 'DELETE' });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Autoturism șters cu succes!');
+                    location.reload();
+                }
+            } catch (error) {
+                alert('❌ Eroare: ' + error.message);
+            }
+        }
+    }
+
+    // Toggle Car Availability
+    async function toggleCarAvailability(carId, currentAvailable) {
+        const isAvailable = currentAvailable === 'true';
+        const action = isAvailable ? 'indisponibilă' : 'disponibilă';
+
+        if (confirm(`⚠️ Sigur vrei să marchezi această mașină ca ${action}?`)) {
+            try {
+                const response = await fetch(`/manager/api/cars/${carId}/toggle-availability`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✅ ${result.message}`);
+                    location.reload();
+                } else {
+                    alert('❌ Eroare: ' + result.message);
+                }
+            } catch (error) {
+                alert('❌ Eroare: ' + error.message);
+            }
+        }
+    }
+
+    // Rental Management
+    async function approveRental(rentalId) {
+        if (confirm('✅ Aprobați această închiriere?')) {
+            try {
+                const response = await fetch(`/employee/api/rentals/${rentalId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'APPROVED' })
+                });
+                if (response.ok) {
+                    alert('✅ Închiriere aprobată!');
+                    location.reload();
+                }
+            } catch (error) {
+                alert('❌ Eroare: ' + error.message);
+            }
+        }
+    }
+
+    async function rejectRental(rentalId) {
+        if (confirm('❌ Respingeți această închiriere?')) {
+            try {
+                const response = await fetch(`/employee/api/rentals/${rentalId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'REJECTED' })
+                });
+                if (response.ok) {
+                    alert('❌ Închiriere respinsă!');
+                    location.reload();
+                }
+            } catch (error) {
+                alert('❌ Eroare: ' + error.message);
+            }
+        }
+    }
+
+    // Employee Management
+    function showAddEmployeeModal() {
+        document.getElementById('employeeModal').style.display = 'flex';
+    }
+
+    async function saveEmployee(event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+
+        try {
+            const response = await fetch('/manager/api/employees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Angajat adăugat cu succes!');
+                closeModal('employeeModal');
+                location.reload();
+            } else {
+                alert('❌ Eroare: ' + result.message);
+            }
+        } catch (error) {
+            alert('❌ Eroare: ' + error.message);
+        }
+    }
+
+    async function deleteEmployee(empId) {
+        if (confirm('⚠️ Sigur doriți să ștergeți acest angajat?')) {
+            try {
+                const response = await fetch(`/manager/api/employees/${empId}`, { method: 'DELETE' });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Angajat șters cu succes!');
+                    location.reload();
+                }
+            } catch (error) {
+                alert('❌ Eroare: ' + error.message);
+            }
+        }
+    }
+
+    // Attributes Management
+    async function viewAttributes(empId, username) {
+        currentEmployeeId = empId;
+        document.getElementById('attributesTitle').textContent = `📝 Atribuții: ${username}`;
+        document.getElementById('attributesModal').style.display = 'flex';
+        await loadAttributes();
+    }
+
+    async function loadAttributes() {
+        try {
+            const response = await fetch(`/manager/api/employees/${currentEmployeeId}/attributes`);
+            const attributes = await response.json();
+
+            const list = document.getElementById('attributesList');
+            list.innerHTML = attributes.map(attr => `
+                <div class="attribute-item">
+                    <span>${attr.attributeName}</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAttribute(${attr.id})">🗑️ Șterge</button>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async function addAttribute() {
+        const attributeName = document.getElementById('newAttribute').value.trim();
+        if (!attributeName) {
+            alert('⚠️ Introduceți un nume pentru atribut!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/manager/api/employees/${currentEmployeeId}/attributes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ attributeName })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('newAttribute').value = '';
+                await loadAttributes();
+            } else {
+                alert('❌ Eroare: ' + result.message);
+            }
+        } catch (error) {
+            alert('❌ Eroare: ' + error.message);
+        }
+    }
+
+    async function deleteAttribute(attrId) {
+        if (confirm('⚠️ Ștergeți acest atribut?')) {
+            await fetch(`/manager/api/attributes/${attrId}`, { method: 'DELETE' });
+            await loadAttributes();
+        }
+    }
+
+    // Email Management
+    async function sendEmail(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const response = await fetch('/manager/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Email trimis cu succes!');
+                e.target.reset();
+            } else {
+                alert('❌ Eroare: ' + result.message);
+            }
+        } catch (error) {
+            alert('❌ Eroare: ' + error.message);
+        }
+    }
+
+    // Feedback to Client
+    function showSendFeedbackModal() {
+        document.getElementById('feedbackToClientModal').style.display = 'flex';
+        setupManagerStarRating();
+    }
+
+    function setupManagerStarRating() {
+        const stars = document.querySelectorAll('#managerStarRating .star');
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                setManagerRating(rating);
+            });
+        });
+        setManagerRating(5);
+    }
+
+    function setManagerRating(rating) {
+        managerSelectedRating = rating;
+        document.getElementById('managerRatingValue').value = rating;
+        const stars = document.querySelectorAll('#managerStarRating .star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.style.color = '#ffd700';
+            } else {
+                star.style.color = '#ddd';
+            }
+        });
+    }
+
+    async function sendFeedbackToClient(event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = {
+            clientId: formData.get('clientId'),
+            message: formData.get('message'),
+            rating: parseInt(formData.get('rating'))
+        };
+
+        try {
+            const response = await fetch('/feedback/manager-to-client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Feedback trimis cu succes către client!');
+                closeModal('feedbackToClientModal');
+                event.target.reset();
+            } else {
+                alert('❌ Eroare: ' + result.message);
+            }
+        } catch (error) {
+            alert('❌ Eroare: ' + error.message);
+        }
+    }
+
+    // Modal Management
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

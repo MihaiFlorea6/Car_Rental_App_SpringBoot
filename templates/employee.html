@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard - Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Particles */
+        .bg-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        .header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            color: white;
+            padding: 25px 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+            50% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6); }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .btn-success { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            float: right;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 28px;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        th:first-child { border-radius: 10px 0 0 10px; }
+        th:last-child { border-radius: 0 10px 10px 0; }
+
+        tbody tr {
+            background: white;
+            transition: all 0.3s;
+            animation: slideInLeft 0.5s ease-out backwards;
+        }
+
+        tbody tr:nth-child(1) { animation-delay: 0.1s; }
+        tbody tr:nth-child(2) { animation-delay: 0.2s; }
+        tbody tr:nth-child(3) { animation-delay: 0.3s; }
+        tbody tr:nth-child(4) { animation-delay: 0.4s; }
+        tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        tbody tr:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+
+        td:first-child { border-radius: 10px 0 0 10px; }
+        td:last-child { border-radius: 0 10px 10px 0; }
+
+        .badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .badge-pending { background: linear-gradient(135deg, #fff3cd, #ffeaa7); color: #856404; }
+        .badge-approved { background: linear-gradient(135deg, #d4edda, #00b894); color: #155724; }
+        .badge-rejected { background: linear-gradient(135deg, #f8d7da, #ff7675); color: #721c24; }
+
+        .notification {
+            background: linear-gradient(135deg, #e8f4f8, #d4e7f0);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            animation: slideInRight 0.5s ease-out;
+            transition: all 0.3s;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+
+        .notification strong {
+            color: #667eea;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .empty-state::before {
+            content: '📭';
+            display: block;
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+            transition: all 0.3s;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(102,126,234,0.5);
+        }
+
+        .stat-card h3 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102,126,234,0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<!-- Animated Background Particles -->
+<div class="bg-particles"></div>
+
+<div class="header">
+    <div class="logout-btn" style="float: right;">
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger">🚪 Logout</button>
+        </form>
+    </div>
+    <h1>👨‍💼 Employee Dashboard</h1>
+    <p th:text="'Bun venit, ' + ${employee.username}"></p>
+</div>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3 th:text="${#lists.size(pendingRentals)}">0</h3>
+            <p>📋 Cereri în Așteptare</p>
+        </div>
+        <div class="stat-card">
+            <h3 th:text="${#lists.size(emails)}">0</h3>
+            <p>📧 Email-uri Noi</p>
+        </div>
+    </div>
+
+    <!-- Pending Rentals -->
+    <div class="card">
+        <h2>📋 Cereri de Închiriere în Așteptare</h2>
+        <table th:if="${pendingRentals != null and !pendingRentals.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Mașină</th>
+                <th>Perioada</th>
+                <th>Status</th>
+                <th>Acțiuni</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="rental : ${pendingRentals}">
+                <td th:text="${rental.id}"></td>
+                <td th:text="${rental.client != null ? rental.client.username : 'N/A'}"></td>
+                <td th:text="${rental.car != null ? rental.car.brand + ' ' + rental.car.model : 'N/A'}"></td>
+                <td th:text="${rental.startDate} + ' - ' + ${rental.endDate}"></td>
+                <td>
+                    <span class="badge badge-pending" th:text="${rental.status}"></span>
+                </td>
+                <td>
+                    <button class="btn btn-success btn-sm"
+                            th:onclick="'updateStatus(' + ${rental.id} + ', \'APPROVED\')'">
+                        ✅ Aprobă
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                            th:onclick="'updateStatus(' + ${rental.id} + ', \'REJECTED\')'">
+                        ❌ Respinge
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty-state" th:if="${pendingRentals == null or pendingRentals.isEmpty()}">
+            Nu există cereri în așteptare momentan.
+        </div>
+    </div>
+
+    <!-- Email Notifications -->
+    <div class="card">
+        <h2>📧 Notificări Email</h2>
+        <div th:if="${emails == null or #lists.isEmpty(emails)}">
+            <p class="empty-state">Nu aveți notificări noi.</p>
+        </div>
+        <div th:each="email : ${emails}">
+            <div class="notification">
+                <strong th:text="${email.subject}"></strong>
+                <p th:text="${email.message}"></p>
+                <small th:text="'De la: ' + ${email.sender != null ? email.sender.username : 'N/A'} + ' - ' + ${email.sentAt}"></small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Create animated particles
+    const particlesContainer = document.querySelector('.bg-particles');
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        particlesContainer.appendChild(particle);
+    }
+
+    async function updateStatus(rentalId, status) {
+        const response = await fetch(`/employee/api/rentals/${rentalId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: status })
+        });
+
+        if (response.ok) {
+            alert(`✅ Cerere ${status === 'APPROVED' ? 'aprobată' : 'respinsă'} cu succes!`);
+            location.reload();
+        } else {
+            alert('❌ Eroare la actualizarea statusului!');
+        }
+    }
+</script>
+</body>
+</html>
