@@ -1,3 +1,4 @@
 *.sql linguist-generated=false linguist-detectable=true
 templates/client.html linguist-detectable=false
 templates/manager.html linguist-detectable=false
+templates/employee.html linguist-detectable=false
