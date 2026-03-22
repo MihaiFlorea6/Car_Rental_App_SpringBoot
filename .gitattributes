@@ -1,5 +1,4 @@
 *.sql linguist-generated=false linguist-detectable=true
 src/templates/client.html linguist-detectable=false
 src/templates/manager.html linguist-detectable=false
-src/templates/employee.html linguist-detectable=false
-src/templates/login.html linguist-detectable=false
+
